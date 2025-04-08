@@ -8,9 +8,9 @@
 import UIKit
 import AVFoundation
 
-enum CameraError: String {
-    case invalidDeviceInput = "Somethins is wrong with the camera. We are unable to capture the input."
-    case invalidScannedValue = "The value scanned is not valid. This app scans EAN-8 and EAN-13."
+enum CameraError {
+    case invalidDeviceInput
+    case invalidScannedValue
 }
 
 // List of commands - what functions will be a part of the delegate
@@ -33,6 +33,22 @@ final class ScannerVC: UIViewController {
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupCaptureSession()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // check if there is a preview layer
+        guard let previewLayer = previewLayer else {
+            scannerDelegate?.didSurface(error: .invalidDeviceInput)
+            return
+        }
+        
+        previewLayer.frame = view.layer.bounds
+    }
     private func setupCaptureSession() {
         // is there a device that can capture video
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
